@@ -68,9 +68,11 @@ class Pad:
         else:
             self.brakeValue = value
 
-    def fMap(self, value):
-        # x1, x2, y1, y2 = (0,1023, -1, 1)
-        x1, x2, y1, y2 = (-100, 100, -1, 1) # hand detection
+    def fMap(self, value, mode):
+        if mode: #1: Arduino, 0: hand gesture
+            x1, x2, y1, y2 = (0,1023, -1, 1)
+        else:
+            x1, x2, y1, y2 = (-100, 100, -1, 1) # hand detection
         x = ((value - x1) * (y2 - y1) / (x2 - x1)) + y1
         return x
     
@@ -79,16 +81,20 @@ class Pad:
         x = ((value - x1) * (y2 - y1) / (x2 - x1)) + y1
         return x
 
-    def steer(self, value):
-        self.gamepad.left_joystick_float(x_value_float = self.fMap(value), y_value_float = 0)
+    def steer(self, value, mode = 1): #1: Arduino, 0: hand gesture
+        self.gamepad.left_joystick_float(x_value_float = self.fMap(value, mode), y_value_float = 0)
     
-    def gas(self, value):
-        # self.gamepad.right_trigger_float(value_float = self.fMapgb(value))
-        self.gamepad.right_trigger_float(value_float = value) #hand detection
+    def gas(self, value, mode = 1): #1: Arduino, 0: hand gesture
+        if mode:
+            self.gamepad.right_trigger_float(value_float = self.fMapgb(value))
+        else:
+            self.gamepad.right_trigger_float(value_float = value) #hand detection
     
-    def brake(self, value):
-        #self.gamepad.right_joystick_float(x_value_float = 0, y_value_float = self.fMapgb(value))
-        self.gamepad.right_joystick_float(x_value_float = 0, y_value_float = value) # hand detection
+    def brake(self, value, mode = 1): #1: Arduino, 0: hand gesture
+        if mode:
+            self.gamepad.right_joystick_float(x_value_float = 0, y_value_float = self.fMapgb(value))
+        else:
+            self.gamepad.right_joystick_float(x_value_float = 0, y_value_float = value) # hand detection
         #self.gamepad.left_trigger_float(value_float = self.fMapgb(value))
 
 
