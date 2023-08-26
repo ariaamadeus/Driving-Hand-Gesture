@@ -19,7 +19,7 @@ while det.cap.isOpened():
         
     
     if left[0]:
-        pad.gear(left[1])
+        pad.gear(left[1].item())
         pad.brakeValue = 1 if left[2] > 0.17 else 0
     pad.update(mode=0)
     print("left:",left)

@@ -57,6 +57,7 @@ class Pad:
         self.steerValue = 0
         self.gasValue = 0
         self.brakeValue = 0
+        self.last_pressed = 0
 
     def allInput(self, msg):
         inputType = msg[0]
@@ -102,18 +103,19 @@ class Pad:
     #    self.gamepad.right_joystick_float(x_value_float = self.fMap(gasValue), y_value_float = self.fMap(brakeValue))
 
     def gear(self, value):
-        if value == 1:
-            self.gamepad.press_button(button=vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_UP)
-        elif value == 2:
-            self.gamepad.press_button(button=vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_LEFT)
-        elif value == 3:
-            self.gamepad.press_button(button=vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_DOWN)
-        elif value == 4:
-            self.gamepad.press_button(button=vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_RIGHT)
-        elif value == 5:
-            self.gamepad.press_button(button=vg.XUSB_BUTTON.XUSB_GAMEPAD_A)
-        elif value == 6:
-            self.gamepad.press_button(button=vg.XUSB_BUTTON.XUSB_GAMEPAD_B)
+        buttons = [vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_UP,
+                   vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_LEFT,
+                   vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_DOWN,
+                   vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_RIGHT,
+                   vg.XUSB_BUTTON.XUSB_GAMEPAD_A,
+                   vg.XUSB_BUTTON.XUSB_GAMEPAD_B]
+        if value != self.last_pressed:
+            try:
+                self.gamepad.release_button(button=buttons[self.last_pressed])
+            except:
+                pass
+            self.last_pressed = value
+        self.gamepad.press_button(button=buttons[value-1])
 
     def update(self, mode = 1):
         self.steer(self.steerValue, mode)
