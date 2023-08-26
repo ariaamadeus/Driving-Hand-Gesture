@@ -1,6 +1,5 @@
 from detectMT import HandDetection
 from joystick import Pad
-from theKeyboard import Keyboard
 
 fontScale = 3 # ukuran font
 maxHands = 2 # 1 player
