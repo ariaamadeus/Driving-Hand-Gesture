@@ -109,13 +109,14 @@ class Pad:
                    vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_RIGHT,
                    vg.XUSB_BUTTON.XUSB_GAMEPAD_A,
                    vg.XUSB_BUTTON.XUSB_GAMEPAD_B]
-        if value != self.last_pressed:
-            try:
-                self.gamepad.release_button(button=buttons[self.last_pressed])
-            except:
-                pass
-            self.last_pressed = value
-        self.gamepad.press_button(button=buttons[value-1])
+        if 1 <= value <=  6:
+            if value != self.last_pressed:
+                try:
+                    self.gamepad.release_button(button=buttons[self.last_pressed-1])
+                except:
+                    pass
+                self.last_pressed = value
+            self.gamepad.press_button(button=buttons[value-1])
 
     def update(self, mode = 1):
         self.steer(self.steerValue, mode)
