@@ -105,8 +105,8 @@ class Pad:
     def gear(self, value):
         buttons = [vg.XUSB_BUTTON.XUSB_GAMEPAD_START,
                    vg.XUSB_BUTTON.XUSB_GAMEPAD_BACK,
-                   vg.XUSB_BUTTON.XUSB_GAMEPAD_X,
-                   vg.XUSB_BUTTON.XUSB_GAMEPAD_Y,
+                   vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_RIGHT,
+                   vg.XUSB_BUTTON.XUSB_GAMEPAD_GUIDE,
                    vg.XUSB_BUTTON.XUSB_GAMEPAD_A,
                    vg.XUSB_BUTTON.XUSB_GAMEPAD_B]
         if 1 <= value <=  6:
