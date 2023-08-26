@@ -43,7 +43,7 @@ class HandDetection:
         self.steering = 0
         self.gas = 0
         self.brake = 0
-        self.averaging = [0,0,0,0,0,0,0,0,0]
+        self.averaging = [0,0]
         self.show_image = show_image
 
     def capIsOpened(self):
