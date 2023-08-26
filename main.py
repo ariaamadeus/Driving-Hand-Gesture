@@ -14,12 +14,10 @@ while det.cap.isOpened():
     left, right, image = det.detectHandNumber()
     if right[0]:
         pad.steerValue = right[1]
-        pad.gasValue = 1 if right[2] > 0.17 else 0
+        pad.gasValue = 1 if right[2] > 0.15 else 0
         
     
     if left[0]:
         pad.gear(left[1].item())
-        pad.brakeValue = 1 if left[2] > 0.17 else 0
+        pad.brakeValue = 1 if left[2] > 0.15 else 0
     pad.update(mode=0)
-    print("left:",left)
-    print("right:",right)
