@@ -101,6 +101,20 @@ class Pad:
     #def gas_brake(self, gasValue, brakeValue):
     #    self.gamepad.right_joystick_float(x_value_float = self.fMap(gasValue), y_value_float = self.fMap(brakeValue))
 
+    def gear(self, value):
+        if value == 1:
+            self.gamepad.press_button(button=vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_UP)
+        elif value == 2:
+            self.gamepad.press_button(button=vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_LEFT)
+        elif value == 3:
+            self.gamepad.press_button(button=vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_DOWN)
+        elif value == 4:
+            self.gamepad.press_button(button=vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_RIGHT)
+        elif value == 5:
+            self.gamepad.press_button(button=vg.XUSB_BUTTON.XUSB_GAMEPAD_A)
+        elif value == 6:
+            self.gamepad.press_button(button=vg.XUSB_BUTTON.XUSB_GAMEPAD_B)
+
     def update(self, mode = 1):
         self.steer(self.steerValue, mode)
         self.gas(self.gasValue, mode)

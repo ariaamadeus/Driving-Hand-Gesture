@@ -9,7 +9,7 @@ show_image = False
 
 det = HandDetection(maxHands = maxHands, flip = flip, show_image = show_image)
 pad = Pad()
-keyboard = Keyboard()
+# keyboard = Keyboard()
     
 while det.cap.isOpened():
     left, right, image = det.detectHandNumber()
@@ -19,7 +19,7 @@ while det.cap.isOpened():
         
     
     if left[0]:
-        keyboard.gear(left[1])
+        pad.gear(left[1])
         pad.brakeValue = 1 if left[2] > 0.17 else 0
     pad.update(mode=0)
     print("left:",left)
