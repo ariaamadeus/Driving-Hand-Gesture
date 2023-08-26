@@ -101,10 +101,10 @@ class Pad:
     #def gas_brake(self, gasValue, brakeValue):
     #    self.gamepad.right_joystick_float(x_value_float = self.fMap(gasValue), y_value_float = self.fMap(brakeValue))
 
-    def update(self):
-        self.steer(self.steerValue)
-        self.gas(self.gasValue)
-        self.brake(self.brakeValue)
+    def update(self, mode = 1):
+        self.steer(self.steerValue, mode)
+        self.gas(self.gasValue, mode)
+        self.brake(self.brakeValue, mode)
         #self.gas_brake(self.gasValue, self.brakeValue)
         self.gamepad.update()
 
