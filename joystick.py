@@ -103,10 +103,10 @@ class Pad:
     #    self.gamepad.right_joystick_float(x_value_float = self.fMap(gasValue), y_value_float = self.fMap(brakeValue))
 
     def gear(self, value):
-        buttons = [vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_UP,
-                   vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_LEFT,
-                   vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_DOWN,
-                   vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_RIGHT,
+        buttons = [vg.XUSB_BUTTON.XUSB_GAMEPAD_START,
+                   vg.XUSB_BUTTON.XUSB_GAMEPAD_BACK,
+                   vg.XUSB_BUTTON.XUSB_GAMEPAD_X,
+                   vg.XUSB_BUTTON.XUSB_GAMEPAD_Y,
                    vg.XUSB_BUTTON.XUSB_GAMEPAD_A,
                    vg.XUSB_BUTTON.XUSB_GAMEPAD_B]
         if 1 <= value <=  6:
