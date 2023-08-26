@@ -106,7 +106,7 @@ class Pad:
         buttons = [vg.XUSB_BUTTON.XUSB_GAMEPAD_START,
                    vg.XUSB_BUTTON.XUSB_GAMEPAD_BACK,
                    vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_RIGHT,
-                   vg.XUSB_GAMEPAD_RIGHT_SHOULDER,
+                   vg.XUSB_BUTTON.XUSB_GAMEPAD_RIGHT_SHOULDER,
                    vg.XUSB_BUTTON.XUSB_GAMEPAD_A,
                    vg.XUSB_BUTTON.XUSB_GAMEPAD_B]
         if 1 <= value <=  6:
