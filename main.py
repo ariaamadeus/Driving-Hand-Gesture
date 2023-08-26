@@ -21,6 +21,6 @@ while det.cap.isOpened():
     if left[0]:
         keyboard.gear(left[1])
         pad.brakeValue = 1 if left[2] > 17 else 0
-    pad.update()
+    pad.update(mode=0)
     print("left:",left)
     print("right:",right)
