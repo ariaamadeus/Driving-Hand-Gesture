@@ -1,5 +1,4 @@
-from detectMT import HandDetection
-from joystick import Pad
+from detect import HandDetection
 
 fontScale = 3 # ukuran font
 maxHands = 2 # 1 player
@@ -7,7 +6,6 @@ flip = False
 show_image = False
 
 det = HandDetection(maxHands = maxHands, flip = flip, show_image = show_image)
-pad = Pad()
 # keyboard = Keyboard()
     
 while det.cap.isOpened():
