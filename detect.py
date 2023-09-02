@@ -84,7 +84,6 @@ class HandDetection:
             for handLms in resultsHand.multi_handedness:
                 handtypes.append(handLms.classification[0].label) #Left, Right 
                 #terbalik, Left = tg kanan, Right = tg kiri
-            
             for i,handLms in enumerate(resultsHand.multi_hand_landmarks):
                 handLmsList = handLms.landmark
                 handLm0 = handLmsList[0]
@@ -120,21 +119,37 @@ class HandDetection:
                     self.mp_drawing.draw_landmarks(image, handLms,
                                                 self.mpHands.HAND_CONNECTIONS)
                 if self.recognizeTrig == self.recognizeTrigTarget:
+                    
                     if handtypes[i] == "Right":
-                        # print("Left") #flipped
-                        if self.modell != None:
-                            df = pd.DataFrame([hand_row])
-                            predicted = self.modell.predict(df)[0]
-                            self.results[i] = [str(predicted),handLm0.x]
+                        if self.flip:
+                            # print("Left") #flipped
+                            if self.modell != None:
+                                df = pd.DataFrame([hand_row])
+                                predicted = self.modell.predict(df)[0]
+                                self.results[i] = [str(predicted),handLm0.x]
+                        else:
+                            # print("Right") #flipped
+                            if self.modelr != None:
+                                df = pd.DataFrame([hand_row])
+                                predicted = self.modelr.predict(df)[0]
+                                self.results[i] = [str(predicted),handLm0.x]
 
                     elif handtypes[i] == "Left":
-                        # print("Right") #flipped
-                        if self.modelr != None:
-                            df = pd.DataFrame([hand_row])
-                            predicted = self.modelr.predict(df)[0]
-                            self.results[i] = [str(predicted),handLm0.x]
-                    
-                    
+                        if self.flip:
+                            # print("Right") #flipped
+                            
+                            if self.modelr != None:
+                                df = pd.DataFrame([hand_row])
+                                predicted = self.modelr.predict(df)[0]
+                                self.results[i] = [str(predicted),handLm0.x]
+                            
+                        else:
+                            # print("Left") #flipped
+                            if self.modell != None:
+                                df = pd.DataFrame([hand_row])
+                                predicted = self.modell.predict(df)[0]
+                                self.results[i] = [str(predicted),handLm0.x]
+                                
             if self.recognizeTrig < self.recognizeTrigTarget:
                 self.recognizeTrig += 1
             else:
@@ -220,8 +235,9 @@ class HandDetection:
         
         self.startwPos = startwPos
         self.starthPos = starthPos
-        self.wpixel= wpixel
-        self.hpixel= hpixel
+        # self.wpixel = wpixel
+        self.wpixel = 144
+        self.hpixel = hpixel
 
         for x in range(hands):
             startPos = (startwPos, starthPos)
@@ -299,22 +315,25 @@ class HandDetection:
                 valid_combinations.append(ans)
         return valid_combinations
     
-    def drawEquation(self, image, imageShrink, eq):
+    def drawEquation(self, image, imageShrink, eq, ofset):
         w = image.shape[1]
         h = imageShrink.shape[0]
         
+        wsofset = int(ofset[0] * w/100)
+        hsofset = int(ofset[1] * h/100)
+
         textsize1 = self.textSize(eq[0])
         textsize2 = self.textSize(eq[2])
         textsize3 = self.textSize(eq[4])
         textsize4 = self.textSize('=')
         textsize5 = self.textSize(eq[5])
         wpixel = self.wpixel
-        textX1 = self.startwPos - (textsize1[0]/2)
-        textX2 = self.startwPos + wpixel - (textsize2[0]/2)
-        textX3 = self.startwPos + wpixel*2 - (textsize3[0]/2)
-        textX4 = self.startwPos + wpixel*2.5 - (textsize4[0]/2)
-        textX5 = self.startwPos + wpixel*3.2 - (textsize5[0]/2)
-        textY = (h + textsize1[1]) / 2
+        textX1 = self.startwPos - (textsize1[0]/2) + wsofset
+        textX2 = self.startwPos + wpixel - (textsize2[0]/2) + wsofset
+        textX3 = self.startwPos + wpixel*2 - (textsize3[0]/2) + wsofset
+        textX4 = self.startwPos + wpixel*2.5 - (textsize4[0]/2) + wsofset
+        textX5 = self.startwPos + wpixel*3.2 - (textsize5[0]/2) + wsofset
+        textY = ((h + textsize1[1]) / 2) + hsofset 
         image = self.putText(image = image, text = eq[0], pos=(textX1,textY))
         image = self.putText(image = image, text = eq[2], pos=(textX2,textY))
         image = self.putText(image = image, text = eq[4], pos=(textX3,textY))
@@ -323,11 +342,14 @@ class HandDetection:
         
         return image
     
-    def drawText(self, image, imageShrink, text, fontScale, xhand0):
+    def drawText(self, image, imageShrink, text, fontScale, xhand0, ofset):
         try:
 
             w = imageShrink.shape[1]
             h = imageShrink.shape[0]
+
+            wsofset = int(ofset[0] * image.shape[1]/100)
+            hsofset = int(ofset[1] * image.shape[1]/100)
 
             xpos = 0
             for i in range(self.maxHands):
@@ -345,8 +367,8 @@ class HandDetection:
             # endPos = (self.startwPos + self.wpixel, self.starthPos + self.hpixel)
             textsize = self.textSize(text=text)
 
-            textX = self.startwPos + (wpixel*xpos) + (wpixel/2) - (textsize[0]/2)
-            textY = (h + textsize[1]) / 2
+            textX = self.startwPos + (wpixel*xpos) + (wpixel/2) - (textsize[0]/2) + wsofset
+            textY = ((h + textsize[1]) / 2) + hsofset
             self.putText(image=image, text=text, pos=(textX,textY))
             return image
         except Exception as e:
@@ -365,9 +387,9 @@ if __name__ == "__main__":
     
     angka = '0001'
     kodeRahasia = 254414
-    fontScale = 1 # ukuran font
-    shrink = 30 # 0 -> 100
-    ofset = (-20,0) # -50 -> 50
+    shrink = 25 # 0 -> 100
+    ofset = (-10,0) # -50 -> 50
+    ofsetbox = (0,20) # -50 -> 50
     maxHands = 2
     flip = True
     show_image = True
@@ -395,22 +417,36 @@ if __name__ == "__main__":
             if win:
                 if not lastframeWin:
                     print("reward")
-                eq = det.rndEquation(op)
-                win = False
-                anss = det.otherOp(eq) # find the suitable ops
                 
-            results, image = det.detectHandNumber(shrink, ofset)
+                while True:
+                    eq = det.rndEquation(op)
+                    anss = det.otherOp(eq) # find the suitable ops
+                    if len(anss) > 0:
+                        break
+                win = False
+            results, image = det.detectHandNumber(shrink, ofsetbox)
             
-            image, imageShrink = det.drawBoxPlace(image, hands = maxHands, ofset = ofset)
+            image, imageShrink = det.drawBoxPlace(image, hands = maxHands, ofset = ofsetbox)
             answer = ''
+            xpos = 0
             for key in results.keys():
                 if 1 <= int(results[key][0]) <= 4:
                     text = op[int(results[key][0])-1]
+                    
                     answer += text
-                    image = det.drawText(image, imageShrink, text, 2, results[key][1])
+                    print(xpos, results[key][1])
+                    if results[key][1] < xpos: 
+                        print("masuk")
+                        answer = answer[::-1]
+                    xpos = results[key][1]
+                    image = det.drawText(image, imageShrink, text, 2, results[key][1], ofset=ofset)
+            if not lastframeWin:
+                image = det.drawEquation(image, imageShrink, eq, ofset=ofset)
+            else:
+                image = det.drawEquation(image, imageShrink, ["LO", "", "AD", "", "I", "NG"], ofset=ofset)
             
-            image = det.drawEquation(image, imageShrink, eq)
-            if answer in anss:     
+            print(anss, answer)
+            if answer in anss:
                 win = True
                 lastframeWin = True
             else:
