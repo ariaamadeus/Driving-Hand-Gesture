@@ -1,12 +1,6 @@
 import cv2
 
 import mediapipe as mp
-from mediapipe.framework.formats import landmark_pb2
-
-import matplotlib.pyplot as plt
-
-import time
-import math
 
 class PoseDetection:
     def __init__(self):
