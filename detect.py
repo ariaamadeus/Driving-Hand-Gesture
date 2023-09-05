@@ -381,6 +381,7 @@ class HandDetection:
         self.cap.release()
         cv2.destroyAllWindows()
 
+class 
 
 mode = 1 #0: escape room, 1: math equation
 if __name__ == "__main__":

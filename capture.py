@@ -94,7 +94,7 @@ while cap.isOpened():
     cv2.imshow('Raw Webcam Feed', image)
 
     key = cv2.waitKey(1) & 0xFF
-    if key in [ord(x) for x in['1','2','3','4','5','6','7','8','9','0','q','n','l','r']]:
+    if key in [ord(x) for x in['+','-','*','/','q','n']]:
         if chr(key) == 'q':
             break
         elif chr(key) == 'l':
@@ -104,15 +104,15 @@ while cap.isOpened():
             handtype = 'r'
             print("Capturing Right Hand")
         elif chr(key) == 'n':
-            create = input(f"Want to replace a new coords{handtype}.csv?(Y/[n]):")
+            create = input(f"Want to replace a new coords.csv?(Y/[n]):")
             if create == "Y":
                 landmarks = ['class']
                 for val in range(1, 21+1):
                     landmarks += ['x{}'.format(val), 'y{}'.format(val), 'z{}'.format(val)]
-                with open(f'coords{handtype}.csv', mode='w', newline='') as f:
+                with open(f'coords.csv', mode='w', newline='') as f:
                     csv_writer = csv.writer(f, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                     csv_writer.writerow(landmarks)
-                print(f"coords{handtype}.csv Created")
+                print(f"coords.csv Created")
         elif hand_row != 0:
             if handtypes2 == handtype:
                 hand_row.insert(0,chr(key))
