@@ -1,6 +1,5 @@
-vgamepad
 mediapipe
 scikitlearn
 pyautogui
 pandas
-pyserial
+opencv-python
