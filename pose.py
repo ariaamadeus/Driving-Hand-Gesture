@@ -242,6 +242,8 @@ if __name__ == "__main__":
         else:
             lastframeWin = False
         frame = det.drawText(frame, frame, result, 2, 50, ofset=(15,-27))
+        cv2.namedWindow("frame", cv2.WND_PROP_FULLSCREEN)
+        cv2.setWindowProperty("frame", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
         cv2.imshow("frame", frame)
 
         if cv2.waitKey(1) == ord('q'):
