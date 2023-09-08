@@ -1,3 +1,4 @@
+
 import cv2
 
 import mediapipe as mp
@@ -40,21 +41,26 @@ class PoseDetection:
             pointsCheck = [False,False,False,False]
             
             if coords.get(13) != None:
-                pointsCheck[0] = True
                 sikuri = coords[13]
-                cv2.circle(original_image, sikuri, 5, (255,255,255), -1)
+                
             if coords.get(14) != None:
-                pointsCheck[2] = True
                 sikunan = coords[14]
-                cv2.circle(original_image, sikunan, 5, (255,255,255), -1)
+                
             if coords.get(15) != None:
-                pointsCheck[1] = True #0,1 tangan kiri
                 gelangri = coords[15]
-                cv2.circle(original_image, gelangri, 5, (255,255,255), -1)
+                if sikuri[1]-gelangri[1] > -30:
+                    pointsCheck[0] = True
+                    pointsCheck[1] = True #0,1 tangan kiri
+                    
+                    cv2.circle(original_image, sikuri, 5, (255,255,255), -1)
+                    cv2.circle(original_image, gelangri, 5, (255,255,255), -1)
             if coords.get(16) != None:
-                pointsCheck[3] = True #2,3 tangan kanan
                 gelangnan = coords[16]
-                cv2.circle(original_image, gelangnan, 5, (255,255,255), -1)
+                if sikunan[1]-gelangnan[1] > -30:
+                    pointsCheck[2] = True
+                    pointsCheck[3] = True #2,3 tangan kanan
+                    cv2.circle(original_image, sikunan, 5, (255,255,255), -1)
+                    cv2.circle(original_image, gelangnan, 5, (255,255,255), -1)
 
             if not False in pointsCheck:
                 if abs(sikunan[1]-sikuri[1]) < 40 and abs(gelangnan[1]-gelangri[1]) < 40:
@@ -63,19 +69,25 @@ class PoseDetection:
                     result = '+'
                 elif abs(gelangri[0]-sikuri[0]) < 200 or abs(gelangnan[1]-sikunan[1]) < 200:
                     result = '+'
+                elif abs(gelangri[0]-sikuri[0]) > 10 or abs(gelangnan[0]-sikunan[0]) > 10:
+                    result = "start"
                 cv2.line(original_image, sikuri, gelangri, (0, 100, 255),5)
                 cv2.line(original_image, sikunan, gelangnan, (0, 100, 255), 5) 
             elif not False in pointsCheck[:2]: #tangan kiri
                 if abs(gelangri[1]-sikuri[1]) < 70:
                     result = "-"
-                elif abs(gelangri[0]-sikuri[0]) > 70:
+                elif abs(gelangri[0]-sikuri[0]) > 40:
                     result = "/"
+                elif abs(gelangri[0]-sikuri[0]) > 10:
+                    result = "start"
                 cv2.line(original_image, sikuri, gelangri, (0, 100, 255), 5)
             elif not False in pointsCheck[2:]: #tangan kanan
                 if abs(gelangnan[1]-sikunan[1]) < 70:
                     result = "-"
-                elif abs(gelangnan[0]-sikunan[0]) > 70:
+                elif abs(gelangnan[0]-sikunan[0]) > 40:
                     result = "/"
+                elif abs(gelangnan[0]-sikunan[0]) > 10:
+                    result = "start"
                 cv2.line(original_image, sikunan, gelangnan, (0, 100, 255), 5) 
         
         return result, original_image
@@ -96,8 +108,8 @@ class PoseDetection:
             textX = 50 + (wpixel/2) - (textsize[0]/2) + wsofset
             
             textY = ((h + textsize[1]) / 2) + hsofset
-            self.putText(image=image, text=text, pos=(textX,textY))
-            return image
+            # self.putText(image=image, text=text, pos=(textX,textY))
+            return textX, textY
         except Exception as e:
             print(e)
 
@@ -148,14 +160,13 @@ class PoseDetection:
         textX1 = 50 - (textsize1[0]/2) + wsofset
         textX2 = 50 + wpixel - (textsize2[0]/2) + wsofset
         textX3 = 50 + wpixel*1.5 - (textsize3[0]/2) + wsofset
-        textX4 = 50 + wpixel*2.3 - (textsize4[0]/2) + wsofset
+        textX4 = 100 + wpixel*2 - (textsize4[0]/2) + wsofset
         textY = ((h + textsize1[1]) / 2) + hsofset
-        image = self.putText(image = image, text = eq[0], pos=(textX1,textY))
-        image = self.putText(image = image, text = eq[2], pos=(textX2,textY))
-        image = self.putText(image = image, text = "=", pos=(textX3,textY))
-        image = self.putText(image = image, text = eq[3], pos=(textX4,textY))
-        
-        return image
+        # image = self.putText(image = image, text = eq[0], pos=(textX1,textY))
+        # image = self.putText(image = image, text = eq[2], pos=(textX2,textY))
+        # image = self.putText(image = image, text = "=", pos=(textX3,textY))
+        # image = self.putText(image = image, text = eq[3], pos=(textX4,textY))
+        return (eq[0],textX1), (eq[2], textX2), textX3, (eq[3], textX4), textY
     
     def rndEquation(self, op):
         import random
@@ -168,10 +179,13 @@ class PoseDetection:
             if op1 == '/' and num1 % num2 != 0:
                 num1 = random.randint(0,9)
                 num2 = random.randint(1,9)
+                continue
+            result = int(eval(f"num1 {op1} num2"))
+            if result < 0:
+                num1 = random.randint(0,9)
+                num2 = random.randint(1,9)
             else:
                 break
-
-        result = int(eval(f"num1 {op1} num2"))
 
         return num1, op1, num2, result
 
@@ -209,42 +223,42 @@ class PoseDetection:
                 valid_combinations.append(ans)
         return valid_combinations
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    cam = cv2.VideoCapture(0)
-    det = PoseDetection()
-    win = True
-    lastframeWin = True
-    op = ['+','-','*','/']
-    while True:
-        if win:
-            if not lastframeWin:
-                print("reward")
-            while True:
-                eq = det.rndEquation(op)
-                anss = det.otherOp(eq) # find the suitable ops
-                if len(anss) > 0:
-                    break
-            win = False
-        _, frame = cam.read()
-        frame = cv2.flip(frame,1)
+#     cam = cv2.VideoCapture(0)
+#     det = PoseDetection()
+#     win = True
+#     lastframeWin = True
+#     op = ['+','-','*','/']
+#     while True:
+#         if win:
+#             if not lastframeWin:
+#                 print("reward")
+#             while True:
+#                 eq = det.rndEquation(op)
+#                 anss = det.otherOp(eq) # find the suitable ops
+#                 if len(anss) > 0:
+#                     break
+#             win = False
+#         _, frame = cam.read()
+#         frame = cv2.flip(frame,1)
         
-        result, frame= det.detectPose(frame, det.pose_image, draw=True, display=False)
+#         result, frame= det.detectPose(frame, det.pose_image, draw=True, display=False)
         
-        if not lastframeWin:
-            frame = det.drawEquation(frame, frame, eq, ofset=(15,-35))
-        else:
-                image = det.drawEquation(frame, frame, ["LO", "", "AD", "ING"], ofset=(15,-35))
+#         if not lastframeWin:
+#             frame = det.drawEquation(frame, frame, eq, ofset=(15,-35))
+#         else:
+#                 image = det.drawEquation(frame, frame, ["LO", "", "AD", "ING"], ofset=(15,-35))
         
-        if result in anss:
-            win = True
-            lastframeWin = True
-        else:
-            lastframeWin = False
-        frame = det.drawText(frame, frame, result, 2, 50, ofset=(15,-27))
-        cv2.namedWindow("frame", cv2.WND_PROP_FULLSCREEN)
-        cv2.setWindowProperty("frame", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-        cv2.imshow("frame", frame)
+#         if result in anss:
+#             win = True
+#             lastframeWin = True
+#         else:
+#             lastframeWin = False
+#         frame = det.drawText(frame, frame, result, 2, 50, ofset=(15,-27))
+#         cv2.namedWindow("frame", cv2.WND_PROP_FULLSCREEN)
+#         cv2.setWindowProperty("frame", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+#         cv2.imshow("frame", frame)
 
-        if cv2.waitKey(1) == ord('q'):
-            break
+#         if cv2.waitKey(1) == ord('q'):
+#             break
