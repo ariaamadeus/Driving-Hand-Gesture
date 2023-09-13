@@ -1,7 +1,5 @@
 import cv2
 
-
-
 #https://pyimagesearch.com/2021/01/20/opencv-rotate-image/
 def rotate_image(image, angle):
     (h, w) = image.shape[:2]

@@ -7,6 +7,7 @@ class Arduino:
         self.baudrate = 9600
         self.timeout = 0.01
         self.Serial = serial.Serial(port = self.port, baudrate = self.baudrate, timeout = self.timeout)
+        self.connected = False
 
     def detectPort(self):
         choosedPort = None
@@ -29,8 +30,10 @@ class Arduino:
         elif len(ports) == 1:
             choosedPort = ports[0]    
         else:
-            print("Arduino UNO not detected") 
+            print("Arduino UNO / ESP32 not detected") 
         
+        if choosedPort:
+            self.connected = True
         print(f"Using port: {choosedPort}")
         return choosedPort
 

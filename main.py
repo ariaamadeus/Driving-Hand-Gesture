@@ -1,11 +1,15 @@
 from pose import PoseDetection
 import cv2
 import time
+from threading import Thread
 
 from hardware import Arduino
 from imanip import draw_overlay, resize_scale
+from game import Game
 
 arduino = Arduino()
+game = Game()
+soundThread = Thread(target=game.play_sound)
 
 cam = cv2.VideoCapture(0)
 det = PoseDetection()
@@ -17,6 +21,12 @@ ori_backdrop = cv2.imread("images/back.png", -1)
 
 check_true = resize_scale(cv2.imread("images/v1.png",-1), 40)
 check_false = resize_scale(cv2.imread("images/v0.png",-1),40)
+congrats = [resize_scale(cv2.imread("images/congrats.png",-1), 100),
+            resize_scale(cv2.imread("images/congratsGlow.png",-1), 100)]
+raiseHand = resize_scale(cv2.imread("images/Raise.png",-1), 100)
+go = resize_scale(cv2.imread("images/Go.png",-1), 100)
+
+
 
 op = {'+':None,'-':None,'*':None,'/':None}
 equals = cv2.imread("images/=.png", -1)
@@ -62,11 +72,13 @@ def win_animate(frame):
             for x in range(3):
                 if animate_bool:
                     frame = draw_overlay(frame, (checks_x[x] - check_false.shape[1]/2) , 10, check_false)
+                    frame = draw_overlay(frame, (frame.shape[1]/2 - congrats[1].shape[1]/2) , 100, congrats[1])
                 else:
                     frame = draw_overlay(frame, (checks_x[x] - check_true.shape[1]/2) , 10, check_true)
+                    frame = draw_overlay(frame, (frame.shape[1]/2 - congrats[0].shape[1]/2) , 100, congrats[0])
             animate_bool = not animate_bool
             animate_counter -= 1
-            animate_timer = time.time()        
+            animate_timer = time.time()
     else:
         for x in range(3):
             frame = draw_overlay(frame, (checks_x[x] - check_false.shape[1]/2) , 10, check_false)
@@ -74,14 +86,36 @@ def win_animate(frame):
         animate_counter = 6
     return done
 
+def count_animate(frame):
+    global animate_timer, animate_bool, animate_counter, check_false, check_true, done
+    if animate_counter:
+        if animate_counter-1:
+            frame = draw_overlay(frame, (frame.shape[1]/2 - num[animate_counter-1].shape[1]/2) , 100, num[animate_counter-1])
+        else:
+            frame = draw_overlay(frame, (frame.shape[1]/2 - go.shape[1]/2) , 100, go)
+        if time.time() - animate_timer > 1:
+            animate_counter -= 1
+            animate_timer = time.time()
+    else:
+        for x in range(3):
+            frame = draw_overlay(frame, (checks_x[x] - check_false.shape[1]/2) , 10, check_false)
+        done = True
+        animate_counter = 6
+    return done
+
+firstPlay = False
 while True:
+
     # Detect
     _, frame = cam.read()
     frame = cv2.flip(frame,1)
     result, frame = det.detectPose(frame, det.pose_image, draw=True, display=False)
-    if result == "start":
+    if (result == "start" or result == "/") and not in_game:
         in_game = True
         give = True
+        firstPlay = True
+        animate_counter = 4
+        animate_timer = 0
     # Draw Check
     for x in range(3):
         if three_win <= x:
@@ -89,7 +123,12 @@ while True:
         else:
             frame = draw_overlay(frame, (checks_x[x] - check_false.shape[1]/2) , 10, check_true)
 
-    if in_game:
+    if firstPlay:
+        if count_animate(frame): #- > done
+            firstPlay = False
+            done = False
+    elif in_game :
+        
         if result == "start": result = '/'
         if win:
             while True:
@@ -103,13 +142,15 @@ while True:
         
         
 
-        optimer = time.time()
+        optimer = time.time() # Stay with the same operator to answer
         if three_win == 3:
-            if give:
-                arduino.write("1")
+            if give: #give reward
+                if arduino.connected:
+                    arduino.write("1")
+                soundThread.start()
                 give = False
             done = win_animate(frame)
-            if done:
+            if done: #done celebration
                 three_win = 0
                 in_game = False
                 done = False
@@ -142,7 +183,7 @@ while True:
             frame = draw_overlay(frame, x, y, op[result])
 
         if result in anss:
-            if optimer > 1.5:
+            if optimer > 1.5: # Stay with the same operator more than 1.5s to answer
                 last_true_result = result
                 starttime = time.time()
                 three_win += 1
@@ -150,7 +191,9 @@ while True:
                 lastframeWin = True
         else:
             lastframeWin = False
-        
+
+    else: #not in game
+        frame = draw_overlay(frame, (frame.shape[1]/2 - raiseHand.shape[1]/2) , 100, raiseHand)   
         
     
     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2RGBA)
