@@ -18,7 +18,7 @@ class Arduino:
             
             if "Arduino" in port:
                 ports.append(port.split(' ')[0])
-            elif "CP2102" in port:
+            elif "CP210" in port:
                 ports.append(port.split(' ')[0])
         
         if len(ports) > 1:
