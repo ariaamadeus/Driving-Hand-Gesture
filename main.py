@@ -91,7 +91,7 @@ def count_animate(frame):
     if animate_counter:
         if 0 < animate_counter-1 < 4:
             frame = draw_overlay(frame, (frame.shape[1]/2 - num[animate_counter-1].shape[1]/2) , 100, num[animate_counter-1])
-        else:
+        elif animate_counter-1 == 0:
             frame = draw_overlay(frame, (frame.shape[1]/2 - go.shape[1]/2) , 100, go)
         if time.time() - animate_timer > 0.8:
             animate_counter -= 1
@@ -147,8 +147,7 @@ while True:
             if give: #give reward
                 if arduino.connected:
                     arduino.write("1")
-                soundThread.start()
-                soundThread.join()
+                game.play_sound()
                 give = False
             done = win_animate(frame)
             if done: #done celebration

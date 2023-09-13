@@ -11,7 +11,7 @@ class Game:
 
     def play_sound(self):
         mixer.music.play()
-        time.sleep(self.length)
+        # time.sleep(self.length)
 
     def load(self, song):
         self.length = mixer.Sound(song).get_length()
