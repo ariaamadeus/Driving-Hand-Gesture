@@ -25,8 +25,7 @@ congrats = [resize_scale(cv2.imread("images/congrats.png",-1), 100),
             resize_scale(cv2.imread("images/congratsGlow.png",-1), 100)]
 raiseHand = resize_scale(cv2.imread("images/Raise.png",-1), 100)
 go = resize_scale(cv2.imread("images/Go.png",-1), 100)
-
-
+dispense = resize_scale(cv2.imread("images/Dispense.png",-1), 50)
 
 op = {'+':None,'-':None,'*':None,'/':None}
 equals = cv2.imread("images/=.png", -1)
@@ -62,12 +61,14 @@ in_game = False
 animate_timer = 0
 animate_counter = 6
 animate_bool = 0
+dispensing_time = 0
 done = False
 give = True
 
 def win_animate(frame):
-    global animate_timer, animate_bool, animate_counter, check_false, check_true, done
-    if animate_counter:
+    global animate_timer, animate_bool, animate_counter, check_false, check_true, dispensing_time, done
+    if time.time() - dispensing_time < 5:
+        frame = draw_overlay(frame, (frame.shape[1]/2 - dispense.shape[1]/2) , (frame.shape[0]/2 - dispense.shape[0]/2), dispense)
         if time.time() - animate_timer > 0.7:
             for x in range(3):
                 if animate_bool:
@@ -77,14 +78,12 @@ def win_animate(frame):
                     frame = draw_overlay(frame, (checks_x[x] - check_true.shape[1]/2) , 10, check_true)
                     frame = draw_overlay(frame, (frame.shape[1]/2 - congrats[0].shape[1]/2) , 100, congrats[0])
             animate_bool = not animate_bool
-            animate_counter -= 1
             animate_timer = time.time()
     else:
         for x in range(3):
             frame = draw_overlay(frame, (checks_x[x] - check_false.shape[1]/2) , 10, check_false)
         done = True
-        animate_counter = 6
-    return done
+    return frame, done
 
 def count_animate(frame):
     global animate_timer, animate_bool, animate_counter, check_false, check_true, done
@@ -104,18 +103,29 @@ def count_animate(frame):
     return done
 
 firstPlay = False
+raiseHandImune = 0
+first_raiseHand = True
+
 while True:
 
     # Detect
     _, frame = cam.read()
     frame = cv2.flip(frame,1)
+    frame = det.black_crop_center(frame,30)
     result, frame = det.detectPose(frame, det.pose_image, draw=True, display=False)
     if (result == "start" or result == "/") and not in_game:
-        in_game = True
-        give = True
-        firstPlay = True
-        animate_counter = 5
-        animate_timer = 0
+        if first_raiseHand:
+            raiseHandImune = time.time()
+            first_raiseHand = False
+        if time.time() - raiseHandImune > 0.7:
+            in_game = True
+            give = True
+            firstPlay = True
+            animate_counter = 5
+            animate_timer = 0
+    else:
+        raiseHandImune = time.time()
+        first_raiseHand = True
     # Draw Check
     for x in range(3):
         if three_win <= x:
@@ -139,17 +149,20 @@ while True:
                 elif len(anss) > 0:
                     break
             win = False
-        
-        
 
         optimer = time.time() # Stay with the same operator to answer
         if three_win == 3:
             if give: #give reward
-                if arduino.connected:
-                    arduino.write("1")
+                if arduino.connected : arduino.write("1")
+                else:
+                    arduino.port = arduino.detectPort()
+                    arduino.connect()
+                    if arduino.connected : arduino.write("1")
+                    else : print("Arduino/ESP not connected")
+                dispensing_time = time.time()
                 game.play_sound()
                 give = False
-            done = win_animate(frame)
+            frame, done = win_animate(frame)
             if done: #done celebration
                 three_win = 0
                 in_game = False
@@ -193,8 +206,7 @@ while True:
             lastframeWin = False
 
     else: #not in game
-        frame = draw_overlay(frame, (frame.shape[1]/2 - raiseHand.shape[1]/2) , 100, raiseHand)   
-        
+        frame = draw_overlay(frame, (frame.shape[1]/2 - raiseHand.shape[1]/2) , 100, raiseHand)        
     
     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2RGBA)
     frame = cv2.resize(frame,(1024,768), interpolation = cv2.INTER_AREA)
@@ -206,5 +218,9 @@ while True:
     cv2.setWindowProperty("frame", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
     cv2.imshow("frame", backdrop)
     
-    if cv2.waitKey(1) == ord('q'):
+    if three_win == 3: pass
+    elif cv2.waitKey(1) == ord('q'):
         break
+    elif cv2.waitKey(1) == ord('r'):
+        in_game = False
+        three_win = 0

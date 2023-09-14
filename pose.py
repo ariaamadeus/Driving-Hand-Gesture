@@ -1,5 +1,5 @@
-
 import cv2
+import numpy as np
 
 import mediapipe as mp
 
@@ -188,6 +188,14 @@ class PoseDetection:
                 break
 
         return num1, op1, num2, result
+    
+    def black_crop_center(self, frame, scale):
+        blank = np.zeros_like(frame.copy())
+        w = frame.shape[1]
+        blank[:, int((w/2)-(w/2)*(scale/100)):int((w/2)+(w/2)*(scale/100))] = frame[:, int((w/2)-(w/2)*(scale/100)):int((w/2)+(w/2)*(scale/100))]
+
+        return blank
+        
 
     def otherOp(self, eq):
         import itertools

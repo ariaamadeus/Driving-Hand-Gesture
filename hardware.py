@@ -3,11 +3,15 @@ from serial.tools.list_ports import comports
 
 class Arduino:
     def __init__(self):
+        self.connected = False
         self.port = self.detectPort()
         self.baudrate = 9600
         self.timeout = 0.01
-        self.Serial = serial.Serial(port = self.port, baudrate = self.baudrate, timeout = self.timeout)
-        self.connected = False
+        self.Serial = self.connect()
+        
+
+    def connect(self):
+        return serial.Serial(port = self.port, baudrate = self.baudrate, timeout = self.timeout)
 
     def detectPort(self):
         choosedPort = None
@@ -15,7 +19,6 @@ class Arduino:
         for port in list(comports()):
             
             port = str(port)
-            
             if "Arduino" in port:
                 ports.append(port.split(' ')[0])
             elif "CP210" in port:
@@ -34,6 +37,7 @@ class Arduino:
         
         if choosedPort:
             self.connected = True
+        print(self.connected)
         print(f"Using port: {choosedPort}")
         return choosedPort
 
@@ -55,3 +59,4 @@ class Arduino:
 
 if __name__ == "__main__":
     arduino = Arduino()
+    arduino.write("1")
